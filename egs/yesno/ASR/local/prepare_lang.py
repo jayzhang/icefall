@@ -310,6 +310,7 @@ def main():
     tokens = get_tokens(lexicon)
     words = get_words(lexicon)
 
+    ## 消歧的目的：将 <SIL> 和 <UNK> 中的 SIL 赋予不同的 ID (#1 和 #2)，表明这两个静音的功能可能不同
     lexicon_disambig, max_disambig = add_disambig_symbols(lexicon)
 
     for i in range(max_disambig + 1):
@@ -325,6 +326,10 @@ def main():
     assert "<s>" not in words
     assert "</s>" not in words
 
+    ## <eps>: 这是一个 epsilon 符号，表示空字符或空转移。在有限状态机或加权有限状态机中，它表示从一个状态到另一个状态的转移不消耗任何输入符号。
+    ## #0: 这是一个特殊符号，通常用于表示某种占位符或特殊标记。在某些系统中，它可能用于表示未定义的或特殊的音素。
+    ## <s>: 这是一个开始符号，表示句子的开始。在文本处理和语言模型中，它用于标记句子的起始位置。
+    ## </s>: 这是一个结束符号，表示句子的结束。它用于标记句子的结束位置。
     words = ["<eps>"] + words + ["#0", "<s>", "</s>"]
 
     token2id = generate_id_map(tokens)

@@ -31,7 +31,7 @@ def compute_fbank_yesno():
 
     # This dataset is rather small, so we use only one job
     num_jobs = min(1, os.cpu_count())
-    num_mel_bins = 23
+    num_mel_bins = 23 # 变量通常用于指定在计算梅尔频谱时要使用的频带数量。更多的频带可以提供更详细的频谱信息，但也会增加计算复杂度。
 
     dataset_parts = (
         "train",
@@ -47,6 +47,12 @@ def compute_fbank_yesno():
     )
     assert manifests is not None
 
+# manifests样子:
+# {'test': {'recordings': RecordingSet(len=30),
+#           'supervisions': SupervisionSet(len=30)},
+#  'train': {'recordings': RecordingSet(len=30),
+#            'supervisions': SupervisionSet(len=30)}}
+
     assert len(manifests) == len(dataset_parts), (
         len(manifests),
         len(dataset_parts),
@@ -54,6 +60,7 @@ def compute_fbank_yesno():
         dataset_parts,
     )
 
+## Log-Mel filter-bank Fbank and MFCC Mfcc PyTorch implementations. (https://lhotse.readthedocs.io/en/latest/features.html)
     extractor = Fbank(FbankConfig(sampling_rate=8000, num_mel_bins=num_mel_bins))
 
     with get_executor() as ex:  # Initialize the executor only once.
@@ -67,6 +74,7 @@ def compute_fbank_yesno():
                 recordings=m["recordings"],
                 supervisions=m["supervisions"],
             )
+            ## 将训练样本cut_set中的数据进行扩充，扩充的方法是将cut_set中的数据的速度减小10%和增加10%， 以此来增加训练样本的数量
             if "train" in partition:
                 cut_set = (
                     cut_set + cut_set.perturb_speed(0.9) + cut_set.perturb_speed(1.1)

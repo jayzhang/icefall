@@ -26,39 +26,45 @@ log() {
 
 log "dl_dir: $dl_dir"
 
+# 下载waves_yesno.tar
 if [ $stage -le 0 ] && [ $stop_stage -ge 0 ]; then
   log "Stage 0: Download data"
   mkdir -p $dl_dir
-
   if [ ! -f $dl_dir/waves_yesno/.completed ]; then
     lhotse download yesno $dl_dir
   fi
 fi
 
+# 将wav数据生成manifest文件
 if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
   log "Stage 1: Prepare yesno manifest"
   mkdir -p data/manifests
   lhotse prepare yesno $dl_dir/waves_yesno data/manifests
 fi
 
+# feature抽取
 if [ $stage -le 2 ] && [ $stop_stage -ge 2 ]; then
   log "Stage 2: Compute fbank for yesno"
   mkdir -p data/fbank
   ./local/compute_fbank_yesno.py
 fi
 
+#
 if [ $stage -le 3 ] && [ $stop_stage -ge 3 ]; then
   log "Stage 3: Prepare lang"
   # NOTE: "<UNK> SIL" is added for implementation convenience
   # as the graph compiler code requires that there is a OOV word
   # in the lexicon.
+  # SIL 是一个特殊的标记，代表“静音”（silence）
+  # lexicon 是一个列表，其中每个元素是一个元组，元组的第一个元素是单词（word），第二个元素是该单词的音素列表（tokens）。
+  # 例如：[('HELLO', ['H', 'EH', 'L', 'OW']), ('WORLD', ['W', 'ER', 'L', 'D'])]
+  # 本例中，我们每个单次的音素列表只有一个音素，所以我们的lexicon.txt文件如下：
   (
     echo "<SIL> SIL"
     echo "YES Y"
     echo "NO N"
     echo "<UNK> SIL"
   ) > $lang_dir/lexicon.txt
-
   ./local/prepare_lang.py
   ./local/prepare_lang_fst.py --lang-dir ./data/lang_phone --has-silence 1
 fi
