@@ -24,7 +24,7 @@ from icefall.utils import (
     str2bool,
     write_error_stats,
 )
-
+import pprint
 
 def get_parser():
     parser = argparse.ArgumentParser(
@@ -236,6 +236,8 @@ def save_results(
     """
     recog_path = exp_dir / f"recogs-{test_set_name}.txt"
     results = sorted(results)
+    print("---->decode results:\n")
+    pprint.pprint(results)
     store_transcripts(filename=recog_path, texts=results)
     logging.info(f"The transcripts are stored in {recog_path}")
 
