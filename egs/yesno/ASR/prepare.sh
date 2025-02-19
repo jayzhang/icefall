@@ -42,7 +42,7 @@ if [ $stage -le 1 ] && [ $stop_stage -ge 1 ]; then
   lhotse prepare yesno $dl_dir/waves_yesno data/manifests
 fi
 
-# feature抽取
+# feature抽取, 生成data/fbank目录下的cuts文件和feats文件
 if [ $stage -le 2 ] && [ $stop_stage -ge 2 ]; then
   log "Stage 2: Compute fbank for yesno"
   mkdir -p data/fbank
